@@ -156,7 +156,44 @@ def dashboard():
     user_id = session['user_id']
     if role == 'client':
         products = Product.query.filter_by(owner_id=user_id).all()
-        return render_template('dashboard_client.html', products=products)
+        # Check assessment completion for each product
+        products_with_status = []
+        for product in products:
+            # Get all responses for this product
+            responses = QuestionnaireResponse.query.filter_by(product_id=product.id, user_id=user_id).all()
+            
+            # Calculate completion status
+            completed_sections = set([r.section for r in responses])
+            total_sections = len(SECTION_IDS)
+            completed_sections_count = len(completed_sections)
+            is_complete = completed_sections_count == total_sections
+            
+            # Find next section to continue
+            next_section_idx = 0
+            for i, section in enumerate(SECTION_IDS):
+                if section not in completed_sections:
+                    next_section_idx = i
+                    break
+            
+            # Calculate total questions answered
+            total_questions = sum(len(QUESTIONNAIRE[section]) for section in SECTION_IDS)
+            answered_questions = len(responses)
+            
+            product_info = {
+                'id': product.id,
+                'name': product.name,
+                'owner_id': product.owner_id,
+                'is_complete': is_complete,
+                'completed_sections': completed_sections_count,
+                'total_sections': total_sections,
+                'next_section_idx': next_section_idx,
+                'progress_percentage': round((completed_sections_count / total_sections) * 100, 1),
+                'answered_questions': answered_questions,
+                'total_questions': total_questions
+            }
+            products_with_status.append(product_info)
+        
+        return render_template('dashboard_client.html', products=products_with_status)
     elif role == 'lead':
         resps = QuestionnaireResponse.query.all()
         return render_template('dashboard_lead.html', responses=resps)
@@ -164,6 +201,15 @@ def dashboard():
         products = Product.query.all()
         return render_template('dashboard_superuser.html', products=products)
     return redirect(url_for('index'))
+
+def is_assessment_complete(product_id, user_id):
+    """Check if assessment is complete for a product"""
+    completed_sections = set([
+        r.section for r in QuestionnaireResponse.query.filter_by(
+            product_id=product_id, user_id=user_id
+        ).all()
+    ])
+    return len(completed_sections) == len(SECTION_IDS)
 
 @app.route('/add_product', methods=['GET', 'POST'])
 @login_required('client')

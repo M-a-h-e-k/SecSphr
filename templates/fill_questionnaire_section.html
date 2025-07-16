@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <small class="text-muted">
-                        {{ section_idx + 1 }} of {{ total_sections }} sections completed
+                        {{ section_idx + 1 }} of {{ total_sections }} sections
                     </small>
                 </div>
             </div>
@@ -43,7 +43,7 @@
         <!-- Main content -->
         <div class="col-md-9">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient-primary text-white">
+                <div class="card-header">
                     <div class="row align-items-center">
                         <div class="col">
                             <h4 class="mb-0">
@@ -51,66 +51,70 @@
                             </h4>
                         </div>
                         <div class="col-auto">
-                            <span class="badge bg-light text-dark">
-                                Section {{ section_idx+1 }} of {{ total_sections }}
-                            </span>
+                            <span class="badge bg-primary">Section {{ section_idx + 1 }}/{{ total_sections }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data" id="sectionForm">
-                        {% for q in questions %}
-                            {% set qidx = loop.index0 %}
-                            <div class="question-card mb-4">
-                                <div class="card shadow-sm border-0">
-                                    <div class="card-header bg-light">
-                                        <h5 class="mb-1 text-primary">
-                                            <i class="bi bi-question-circle me-2"></i>
-                                            {{ loop.index }}. {{ q.question }}
-                                        </h5>
-                                        <p class="text-muted small mb-0">{{ q.description }}</p>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <h6 class="mb-3">
-                                                    <i class="bi bi-check-circle me-2"></i>Select Answer:
-                                                </h6>
-                                                {% for opt in q.options %}
-                                                <div class="form-check mb-2">
+                        {% for qidx, question in questions %}
+                        <div class="card mb-4 question-card questionnaire-card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <h6 class="question-text">
+                                                <span class="question-number">{{ qidx + 1 }}</span>
+                                                {{ question.question }}
+                                            </h6>
+                                            {% if question.description %}
+                                                <p class="text-muted mb-3">{{ question.description }}</p>
+                                            {% endif %}
+                                            
+                                            <div class="answer-options">
+                                                {% for option in question.options %}
+                                                <div class="form-check answer-option">
                                                     <input class="form-check-input" type="radio" 
-                                                           name="answer_{{ qidx }}" value="{{ opt }}" 
-                                                           id="q{{ qidx }}opt{{ loop.index0 }}" required>
-                                                    <label class="form-check-label" for="q{{ qidx }}opt{{ loop.index0 }}">
-                                                        {{ opt }}
+                                                           name="answer_{{ qidx }}" 
+                                                           id="answer_{{ qidx }}_{{ loop.index0 }}" 
+                                                           value="{{ option }}"
+                                                           data-question-idx="{{ qidx }}"
+                                                           data-section-idx="{{ section_idx }}"
+                                                           data-product-id="{{ product.id }}">
+                                                    <label class="form-check-label" for="answer_{{ qidx }}_{{ loop.index0 }}">
+                                                        {{ option }}
                                                     </label>
                                                 </div>
                                                 {% endfor %}
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-chat-text me-2"></i>Comment (Optional):
-                                                    </label>
-                                                    <textarea class="form-control" name="comment_{{ qidx }}" 
-                                                              rows="3" maxlength="200" 
-                                                              placeholder="Add your comments or explanations..."></textarea>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-paperclip me-2"></i>Upload Evidence (Optional):
-                                                    </label>
-                                                    <input type="file" class="form-control" name="evidence_{{ qidx }}" 
-                                                           accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
-                                                    <div class="form-text">
-                                                        Supported formats: CSV, TXT, PDF, JPG, JPEG, PNG
-                                                    </div>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="bi bi-chat-left-text me-2"></i>Additional Comments:
+                                            </label>
+                                            <textarea class="form-control" name="comment_{{ qidx }}" 
+                                                      rows="3" placeholder="Any additional information..."
+                                                      data-question-idx="{{ qidx }}"
+                                                      data-section-idx="{{ section_idx }}"
+                                                      data-product-id="{{ product.id }}"></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="bi bi-paperclip me-2"></i>Upload Evidence (Optional):
+                                            </label>
+                                            <input type="file" class="form-control" name="evidence_{{ qidx }}" 
+                                                   accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
+                                            <div class="form-text">
+                                                Supported formats: CSV, TXT, PDF, JPG, JPEG, PNG
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         {% endfor %}
                         
                         <div class="d-flex justify-content-between mt-4">
@@ -139,6 +143,96 @@
 </div>
 
 <script>
+// State management for questionnaire
+const QuestionnaireState = {
+    // Generate unique key for localStorage
+    getStorageKey: function(productId, sectionIdx) {
+        return `questionnaire_${productId}_${sectionIdx}`;
+    },
+    
+    // Save form state to localStorage
+    saveState: function(productId, sectionIdx) {
+        const data = {};
+        
+        // Save radio button selections
+        document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+            data[radio.name] = radio.value;
+        });
+        
+        // Save textarea values
+        document.querySelectorAll('textarea').forEach(textarea => {
+            if (textarea.value.trim()) {
+                data[textarea.name] = textarea.value;
+            }
+        });
+        
+        localStorage.setItem(this.getStorageKey(productId, sectionIdx), JSON.stringify(data));
+    },
+    
+    // Load form state from localStorage
+    loadState: function(productId, sectionIdx) {
+        const storageKey = this.getStorageKey(productId, sectionIdx);
+        const savedData = localStorage.getItem(storageKey);
+        
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                
+                // Restore radio button selections
+                Object.keys(data).forEach(name => {
+                    const value = data[name];
+                    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                });
+                
+                // Restore textarea values
+                Object.keys(data).forEach(name => {
+                    const textarea = document.querySelector(`textarea[name="${name}"]`);
+                    if (textarea) {
+                        textarea.value = data[name];
+                    }
+                });
+            } catch (e) {
+                console.error('Error loading saved state:', e);
+            }
+        }
+    },
+    
+    // Clear state for a specific section
+    clearState: function(productId, sectionIdx) {
+        localStorage.removeItem(this.getStorageKey(productId, sectionIdx));
+    }
+};
+
+// Initialize state management
+document.addEventListener('DOMContentLoaded', function() {
+    const productId = {{ product.id }};
+    const sectionIdx = {{ section_idx }};
+    
+    // Load saved state
+    QuestionnaireState.loadState(productId, sectionIdx);
+    
+    // Save state on form changes
+    document.querySelectorAll('input[type="radio"], textarea').forEach(element => {
+        element.addEventListener('change', function() {
+            QuestionnaireState.saveState(productId, sectionIdx);
+        });
+    });
+    
+    // Auto-save on text input
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(() => {
+                QuestionnaireState.saveState(productId, sectionIdx);
+            }, 500);
+        });
+    });
+});
+
+// Form validation and submission
 document.getElementById('sectionForm').addEventListener('submit', function(e) {
     let valid = true;
     const radioGroups = {};
@@ -188,6 +282,11 @@ document.getElementById('sectionForm').addEventListener('submit', function(e) {
         if (firstError) {
             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+    } else {
+        // Clear saved state on successful submission
+        const productId = {{ product.id }};
+        const sectionIdx = {{ section_idx }};
+        QuestionnaireState.clearState(productId, sectionIdx);
     }
 });
 
@@ -199,6 +298,21 @@ document.querySelectorAll('input[type="radio"]').forEach(function(radio) {
         const errorMsg = questionCard.querySelector('.error-message');
         if (errorMsg) {
             errorMsg.remove();
+        }
+    });
+});
+
+// Add visual feedback for answered questions
+document.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const questionCard = this.closest('.question-card');
+        questionCard.classList.add('border-success');
+        questionCard.classList.remove('border-danger');
+        
+        // Add checkmark to question number
+        const questionNumber = questionCard.querySelector('.question-number');
+        if (questionNumber && !questionNumber.querySelector('.bi-check-circle')) {
+            questionNumber.innerHTML += ' <i class="bi bi-check-circle text-success ms-1"></i>';
         }
     });
 });

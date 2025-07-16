@@ -30,7 +30,7 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-8">
-                    <h3 class="mb-0">{{ products|selectattr('name')|list|length }}</h3>
+                    <h3 class="mb-0">{{ products|selectattr('is_complete', 'equalto', false)|list|length }}</h3>
                     <p class="mb-0">Active Assessments</p>
                 </div>
                 <div class="col-4">
@@ -44,11 +44,11 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-8">
-                    <h3 class="mb-0">{{ products|length * 7 }}</h3>
-                    <p class="mb-0">Total Questions</p>
+                    <h3 class="mb-0">{{ products|selectattr('is_complete', 'equalto', true)|list|length }}</h3>
+                    <p class="mb-0">Completed</p>
                 </div>
                 <div class="col-4">
-                    <i class="bi bi-question-circle icon"></i>
+                    <i class="bi bi-check-circle icon"></i>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card dashboard-card">
-            <div class="card-header bg-gradient-primary text-white">
+            <div class="card-header">
                 <h5 class="mb-0">
                     <i class="bi bi-grid-3x3-gap me-2"></i>Your Products
                 </h5>
@@ -87,51 +87,73 @@
                 {% if products %}
                     <div class="dashboard-content">
                         {% for product in products %}
-                        <div class="card h-100 shadow-sm border-0">
+                        <div class="card h-100 shadow-sm border-0 product-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h5 class="card-title mb-0">
                                         <i class="bi bi-box-seam me-2 text-primary"></i>{{ product.name }}
                                     </h5>
-                                    <span class="badge bg-success">Active</span>
+                                    {% if product.is_complete %}
+                                        <span class="product-status active">Completed</span>
+                                    {% else %}
+                                        <span class="product-status inactive">In Progress</span>
+                                    {% endif %}
                                 </div>
                                 
+                                <!-- Assessment Progress -->
+                                <div class="assessment-progress mb-3">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ product.progress_percentage }}%"
+                                             aria-valuenow="{{ product.progress_percentage }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <div class="progress-info">
+                                        <small>{{ product.completed_sections }} of {{ product.total_sections }} sections</small>
+                                        <small>{{ product.progress_percentage }}% complete</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Stats Row -->
                                 <div class="row text-center mb-3">
-                                    <div class="col">
+                                    <div class="col-4">
                                         <div class="text-primary">
-                                            <i class="bi bi-calendar-event fs-4"></i>
+                                            <i class="bi bi-list-check fs-5"></i>
                                         </div>
-                                        <small class="text-muted">Created</small>
+                                        <small class="text-muted">{{ product.answered_questions }}/{{ product.total_questions }} Questions</small>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-4">
                                         <div class="text-success">
-                                            <i class="bi bi-shield-check fs-4"></i>
+                                            <i class="bi bi-shield-check fs-5"></i>
                                         </div>
-                                        <small class="text-muted">Secure</small>
+                                        <small class="text-muted">{{ product.completed_sections }}/{{ product.total_sections }} Sections</small>
                                     </div>
-                                    <div class="col">
-                                        <div class="text-warning">
-                                            <i class="bi bi-graph-up fs-4"></i>
+                                    <div class="col-4">
+                                        <div class="{% if product.is_complete %}text-success{% else %}text-warning{% endif %}">
+                                            <i class="bi bi-{% if product.is_complete %}check-circle{% else %}clock{% endif %} fs-5"></i>
                                         </div>
-                                        <small class="text-muted">Progress</small>
+                                        <small class="text-muted">{% if product.is_complete %}Complete{% else %}In Progress{% endif %}</small>
                                     </div>
                                 </div>
                                 
-                                <div class="progress mb-3">
-                                    <div class="progress-bar bg-gradient-primary" role="progressbar" 
-                                         style="width: {{ (loop.index * 15) % 100 }}%">
-                                    </div>
-                                </div>
-                                
+                                <!-- Action Buttons -->
                                 <div class="d-grid gap-2">
                                     <a href="{{ url_for('product_results', product_id=product.id) }}" 
                                        class="btn btn-outline-primary rounded-pill">
                                         <i class="bi bi-bar-chart me-2"></i>View Results
                                     </a>
-                                    <a href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=0) }}" 
-                                       class="btn btn-gradient-primary rounded-pill">
-                                        <i class="bi bi-play-circle me-2"></i>Continue Assessment
-                                    </a>
+                                    
+                                    {% if product.is_complete %}
+                                        <button class="btn btn-gradient-primary rounded-pill" disabled>
+                                            <i class="bi bi-check-circle me-2"></i>Assessment Complete
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=product.next_section_idx) }}" 
+                                           class="btn btn-gradient-primary rounded-pill">
+                                            <i class="bi bi-play-circle me-2"></i>Continue Assessment
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -156,7 +178,7 @@
 <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-gradient-primary text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="helpModalLabel">
                     <i class="bi bi-question-circle me-2"></i>How to Use Your Dashboard
                 </h5>
@@ -196,8 +218,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const statsCards = document.querySelectorAll('.stat-card');
     statsCards.forEach((card, index) => {
         setTimeout(() => {
-            card.style.transform = 'translateY(-5px)';
-        }, index * 200);
+            card.style.transform = 'translateY(-2px)';
+        }, index * 100);
+    });
+    
+    // Add hover effect to product cards
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
     });
 });
 </script>

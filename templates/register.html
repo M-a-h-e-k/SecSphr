@@ -3,23 +3,23 @@
 {% block title %}Register - SecureSphere{% endblock %}
 
 {% block content %}
-<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100">
+<div class="auth-wrapper">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="auth-card shadow-lg">
                     <div class="card-header text-center">
-                        <div class="mb-3">
-                            <i class="bi bi-person-plus-fill fs-1"></i>
+                        <div class="mb-2">
+                            <i class="bi bi-person-plus-fill fs-2"></i>
                         </div>
-                        <h4 class="fw-bold mb-0">Create Account</h4>
+                        <h4 class="fw-bold mb-1">Create Account</h4>
                         <p class="mb-0 opacity-75">Join SecureSphere today</p>
                     </div>
                     <div class="card-body">
                         <form method="post" id="registerForm" novalidate>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
+                                    <div class="form-floating mb-2">
                                         <input type="text" name="username" class="form-control" id="username" 
                                                placeholder="Username" required>
                                         <label for="username">
@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
+                                    <div class="form-floating mb-2">
                                         <input type="email" name="email" class="form-control" id="email" 
                                                placeholder="Email" required pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$">
                                         <label for="email">
@@ -42,7 +42,7 @@
                             
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
+                                    <div class="form-floating mb-2">
                                         <input type="password" name="password" class="form-control" id="password" 
                                                placeholder="Password" required minlength="8" 
                                                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}">
@@ -53,7 +53,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
+                                    <div class="form-floating mb-2">
                                         <input type="password" name="confirm_password" class="form-control" id="confirm_password" 
                                                placeholder="Confirm Password" required>
                                         <label for="confirm_password">
@@ -66,7 +66,7 @@
                             
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3">
+                                    <div class="form-floating mb-2">
                                         <select name="role" class="form-select" id="role-select" required>
                                             <option value="" selected disabled>Select Role</option>
                                             <option value="client">Client</option>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating mb-3" id="organization-field" style="display:none;">
+                                    <div class="form-floating mb-2" id="organization-field" style="display:none;">
                                         <input type="text" name="organization" class="form-control" id="organization" 
                                                placeholder="Organization Name">
                                         <label for="organization">
@@ -90,7 +90,7 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-3 mb-3">
+                            <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-2 mb-3">
                                 <i class="bi bi-person-plus-fill me-2"></i>Create Account
                             </button>
                             
