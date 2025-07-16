@@ -17,6 +17,15 @@
     --card-shadow-lg: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --border-radius: 8px;
     --transition: all 0.2s ease;
+    
+    /* Enhanced color scheme for better visibility */
+    --navbar-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+    --input-border: #d1d5db;
+    --input-focus: #3b82f6;
+    --text-contrast: #ffffff;
+    --shadow-strong: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -54,10 +63,21 @@ body {
 }
 
 .navbar-brand {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: white !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-contrast) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand:hover {
+    color: #f0f0f0 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .navbar-nav .nav-link {
@@ -159,31 +179,34 @@ body {
 
 /* Card Enhancements */
 .card {
-    border: none;
+    border: 1px solid var(--card-border);
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     transition: var(--transition);
     overflow: hidden;
-    background: white;
+    background: var(--card-bg);
 }
 
 .card:hover {
-    box-shadow: var(--card-shadow-lg);
+    box-shadow: var(--shadow-strong);
     transform: translateY(-1px);
+    border-color: var(--input-focus);
 }
 
 .card-header {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
+    color: var(--text-contrast);
     font-weight: 600;
     font-size: 1rem;
     padding: 1rem 1.25rem;
     border-bottom: none;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .card-body {
     padding: 1.25rem;
     font-size: 0.9rem;
+    color: var(--text-primary);
 }
 
 /* Dashboard Cards - Normalized sizing */
@@ -223,18 +246,23 @@ body {
 /* Form Enhancements */
 .form-control {
     border-radius: var(--border-radius);
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--input-border);
     padding: 0.6rem 0.9rem;
     font-size: 0.9rem;
     transition: var(--transition);
-    background: white;
+    background: var(--card-bg);
     color: var(--text-primary);
 }
 
 .form-control:focus {
-    border-color: var(--primary-color);
+    border-color: var(--input-focus);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     outline: none;
+    background: var(--card-bg);
+}
+
+.form-control:hover {
+    border-color: var(--primary-light);
 }
 
 .form-floating {
