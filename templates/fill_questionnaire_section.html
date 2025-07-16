@@ -185,13 +185,22 @@ const QuestionnaireState = {
                     const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
                     if (radio) {
                         radio.checked = true;
+                        // Trigger visual feedback
+                        const questionCard = radio.closest('.question-card');
+                        if (questionCard) {
+                            questionCard.classList.add('border-success');
+                            const questionNumber = questionCard.querySelector('.question-number');
+                            if (questionNumber && !questionNumber.querySelector('.bi-check-circle')) {
+                                questionNumber.innerHTML += ' <i class="bi bi-check-circle text-success ms-1"></i>';
+                            }
+                        }
                     }
                 });
                 
                 // Restore textarea values
                 Object.keys(data).forEach(name => {
                     const textarea = document.querySelector(`textarea[name="${name}"]`);
-                    if (textarea) {
+                    if (textarea && data[name]) {
                         textarea.value = data[name];
                     }
                 });
