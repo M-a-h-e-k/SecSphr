@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar progress - Fixed position -->
-        <div class="col-md-3">
+    <div class="questionnaire-container">
+        <!-- Sidebar progress - Responsive -->
+        <div class="sidebar-container">
             <div class="sidebar">
                 <div class="card-header">
                     <i class="bi bi-list-check me-2"></i>Progress Tracker
@@ -17,7 +17,8 @@
                         {% if idx == section_idx %}active{% elif done %}text-success{% else %}text-muted{% endif %}">
                         <span>
                             <i class="bi bi-{% if done %}check-circle-fill{% elif idx == section_idx %}arrow-right-circle-fill{% else %}circle{% endif %} me-2"></i>
-                            {{ section }}
+                            <span class="d-none d-md-inline">{{ section }}</span>
+                            <span class="d-md-none">{{ section[:15] }}{% if section|length > 15 %}...{% endif %}</span>
                         </span>
                         {% if done %}
                             <i class="bi bi-check-circle-fill text-success"></i>
@@ -27,7 +28,7 @@
                     </li>
                     {% endfor %}
                 </ul>
-                <div class="card-footer bg-light">
+                <div class="card-footer">
                     <div class="progress mb-2">
                         <div class="progress-bar" role="progressbar" 
                              style="width: {{ ((section_idx + 1) / total_sections * 100) | round(1) }}%">
@@ -41,7 +42,7 @@
         </div>
         
         <!-- Main content -->
-        <div class="col-md-9">
+        <div class="main-content flex-grow-1">
             <div class="card shadow-lg border-0">
                 <div class="card-header">
                     <div class="row align-items-center">
@@ -57,14 +58,14 @@
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data" id="sectionForm">
-                        {% for qidx, question in questions %}
+                        {% for question in questions %}
                         <div class="card mb-4 question-card questionnaire-card">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-8">
                                         <div class="mb-3">
                                             <h6 class="question-text">
-                                                <span class="question-number">{{ qidx + 1 }}</span>
+                                                <span class="question-number">{{ loop.index }}</span>
                                                 {{ question.question }}
                                             </h6>
                                             {% if question.description %}
@@ -75,13 +76,13 @@
                                                 {% for option in question.options %}
                                                 <div class="form-check answer-option">
                                                     <input class="form-check-input" type="radio" 
-                                                           name="answer_{{ qidx }}" 
-                                                           id="answer_{{ qidx }}_{{ loop.index0 }}" 
+                                                           name="answer_{{ loop.index0 }}" 
+                                                           id="answer_{{ loop.index0 }}_{{ loop.index0 }}" 
                                                            value="{{ option }}"
-                                                           data-question-idx="{{ qidx }}"
+                                                           data-question-idx="{{ loop.index0 }}"
                                                            data-section-idx="{{ section_idx }}"
                                                            data-product-id="{{ product.id }}">
-                                                    <label class="form-check-label" for="answer_{{ qidx }}_{{ loop.index0 }}">
+                                                    <label class="form-check-label" for="answer_{{ loop.index0 }}_{{ loop.index0 }}">
                                                         {{ option }}
                                                     </label>
                                                 </div>
@@ -94,9 +95,9 @@
                                             <label class="form-label">
                                                 <i class="bi bi-chat-left-text me-2"></i>Additional Comments:
                                             </label>
-                                            <textarea class="form-control" name="comment_{{ qidx }}" 
+                                            <textarea class="form-control" name="comment_{{ loop.index0 }}" 
                                                       rows="3" placeholder="Any additional information..."
-                                                      data-question-idx="{{ qidx }}"
+                                                      data-question-idx="{{ loop.index0 }}"
                                                       data-section-idx="{{ section_idx }}"
                                                       data-product-id="{{ product.id }}"></textarea>
                                         </div>
@@ -105,7 +106,7 @@
                                             <label class="form-label">
                                                 <i class="bi bi-paperclip me-2"></i>Upload Evidence (Optional):
                                             </label>
-                                            <input type="file" class="form-control" name="evidence_{{ qidx }}" 
+                                            <input type="file" class="form-control" name="evidence_{{ loop.index0 }}" 
                                                    accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
                                             <div class="form-text">
                                                 Supported formats: CSV, TXT, PDF, JPG, JPEG, PNG

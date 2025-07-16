@@ -10,16 +10,53 @@
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Override Bootstrap defaults with professional theme */
         .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
         }
-        .btn-gradient-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
+        
+        /* Responsive typography */
+        h1, .h1 { font-size: 1.75rem; }
+        h2, .h2 { font-size: 1.5rem; }
+        h3, .h3 { font-size: 1.25rem; }
+        h4, .h4 { font-size: 1.125rem; }
+        h5, .h5 { font-size: 1rem; }
+        h6, .h6 { font-size: 0.875rem; }
+        
+        @media (max-width: 768px) {
+            h1, .h1 { font-size: 1.5rem; }
+            h2, .h2 { font-size: 1.25rem; }
+            h3, .h3 { font-size: 1.125rem; }
+            h4, .h4 { font-size: 1rem; }
+            h5, .h5 { font-size: 0.875rem; }
+            h6, .h6 { font-size: 0.825rem; }
         }
-        .btn-gradient-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #2563eb);
-            color: white;
+        
+        /* Responsive spacing utilities */
+        .mb-4 { margin-bottom: 1rem !important; }
+        .mb-3 { margin-bottom: 0.75rem !important; }
+        .mb-2 { margin-bottom: 0.5rem !important; }
+        .pb-4 { padding-bottom: 1rem !important; }
+        .pb-3 { padding-bottom: 0.75rem !important; }
+        .pb-2 { padding-bottom: 0.5rem !important; }
+        
+        @media (min-width: 768px) {
+            .mb-md-4 { margin-bottom: 1.5rem !important; }
+            .mb-md-3 { margin-bottom: 1rem !important; }
+            .pb-md-4 { padding-bottom: 1.5rem !important; }
+            .pb-md-3 { padding-bottom: 1rem !important; }
+        }
+        
+        /* Compact layouts */
+        .container-fluid {
+            max-width: 100%;
+            padding: 0.75rem;
+        }
+        
+        @media (min-width: 768px) {
+            .container-fluid {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
