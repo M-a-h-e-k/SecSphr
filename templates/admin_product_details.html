@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">All Questionnaire Responses</h2>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Section</th>
+            <th>Question</th>
+            <th>Answer</th>
+            <th>Comment</th>
+            <th>Evidence</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in responses %}
+        <tr>
+            <td>{{ r.section }}</td>
+            <td>{{ r.question }}</td>
+            <td>{{ r.answer }}</td>
+            <td>{{ r.comment }}</td>
+            <td>
+                {% if r.evidence_path %}
+                <a href="/{{ r.evidence_path }}" target="_blank">View</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

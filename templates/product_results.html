@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4 text-center">Results & Scores</h2>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-gradient-primary text-white fw-bold">Overall Score</div>
+            <div class="card-body text-center">
+                <canvas id="overallChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-gradient-primary text-white fw-bold">Section-wise Scores</div>
+            <div class="card-body text-center">
+                <canvas id="sectionChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow mb-4">
+    <div class="card-header bg-info text-white fw-bold">All Responses</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Section</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Comment</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in responses %}
+                <tr>
+                    <td>{{ r.section }}</td>
+                    <td>{{ r.question }}</td>
+                    <td>{{ r.answer }}</td>
+                    <td>{{ r.comment }}</td>
+                    <td>
+                        {% if r.evidence_path %}
+                        <a href="/{{ r.evidence_path }}" target="_blank">View</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+fetch('{{ url_for("api_product_scores", product_id=responses[0].product_id if responses else 0) }}')
+    .then(res => res.json())
+    .then(data => {
+        // Overall
+        new Chart(document.getElementById('overallChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Total Score'],
+                datasets: [{ data: [data.total_score, data.max_score - data.total_score], backgroundColor:['#0d6efd','#e9ecef'] }]
+            },
+            options: { plugins: { legend: { display: false } }, cutout:'70%' }
+        });
+        // Section-wise
+        new Chart(document.getElementById('sectionChart'), {
+            type: 'bar',
+            data: {
+                labels: data.section_labels,
+                datasets: [{
+                    label: 'Score',
+                    data: data.section_scores,
+                    backgroundColor:'#0d6efd'
+                }]
+            },
+            options: { responsive:true, plugins:{legend:{display:false}} }
+        });
+    });
+</script>
+{% endblock %}

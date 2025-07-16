@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Review Questionnaire</h2>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h6>Section: {{ response.section }}</h6>
+        <p><strong>Question:</strong> {{ response.question }}</p>
+        <p><strong>Answer:</strong> {{ response.answer }}</p>
+        <form method="post">
+            <div class="mb-3">
+                <label for="lead_comment" class="form-label">Comment (request more details if needed):</label>
+                <textarea name="lead_comment" class="form-control" rows="2">{{ response.comment }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-lg border-0">
+            <div class="card-header text-center bg-gradient-primary text-white py-4">
+                <i class="bi bi-person-plus-fill fs-1"></i>
+                <h4 class="fw-bold mb-0 mt-2">Create Your Account</h4>
+            </div>
+            <div class="card-body bg-light px-4 py-4">
+                <form method="post" id="registerForm" novalidate>
+                    <div class="form-floating mb-3">
+                        <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
+                        <label for="username">Username</label>
+                        <div class="invalid-feedback">Please enter a username.</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Email" required pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$">
+                        <label for="email">Email</label>
+                        <div class="invalid-feedback">Enter a valid email.</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" name="password" class="form-control" id="password" placeholder="Password" required minlength="8" pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}">
+                        <label for="password">Password</label>
+                        <div class="invalid-feedback">Min 8 chars, include uppercase, lowercase, and number.</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Confirm Password" required>
+                        <label for="confirm_password">Confirm Password</label>
+                        <div class="invalid-feedback">Passwords do not match.</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select name="role" class="form-select" id="role-select" required>
+                            <option value="" selected disabled>Select Role</option>
+                            <option value="client">Client</option>
+                            <option value="lead">Lead</option>
+                            <option value="superuser">Superuser</option>
+                        </select>
+                        <label for="role-select">Role</label>
+                        <div class="invalid-feedback">Select a role.</div>
+                    </div>
+                    <div class="form-floating mb-3" id="organization-field" style="display:none;">
+                        <input type="text" name="organization" class="form-control" id="organization" placeholder="Organization Name">
+                        <label for="organization">Organization Name</label>
+                    </div>
+                    <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-2">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('role-select').addEventListener('change', function() {
+    var orgField = document.getElementById('organization-field');
+    if (this.value === 'client') orgField.style.display = 'block';
+    else orgField.style.display = 'none';
+});
+
+document.getElementById("registerForm").addEventListener("submit", function(e){
+    let valid = true;
+    const form = this;
+    const password = form.password;
+    const confirmPassword = form.confirm_password;
+
+    form.querySelectorAll("input[required],select[required]").forEach(function(input){
+        if(!input.value) { input.classList.add("is-invalid"); valid = false; }
+        else input.classList.remove("is-invalid");
+
+        if(input.type === "email" && !input.value.match(input.pattern)) {
+            input.classList.add("is-invalid"); valid = false;
+        }
+
+        if(input.name === "password" && !input.value.match(input.pattern)) {
+            input.classList.add("is-invalid"); valid = false;
+        }
+    });
+
+    if (password.value !== confirmPassword.value) {
+        confirmPassword.classList.add("is-invalid");
+        valid = false;
+    } else {
+        confirmPassword.classList.remove("is-invalid");
+    }
+
+    if (!valid) e.preventDefault();
+});
+</script>
+{% endblock %}

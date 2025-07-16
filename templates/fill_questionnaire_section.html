@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar progress -->
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-gradient-primary text-white fw-bold">Progress</div>
+            <ul class="list-group list-group-flush">
+                {% for idx, section, done in progress %}
+                <li class="list-group-item d-flex justify-content-between align-items-center {% if idx == section_idx %}active{% elif done %}text-success{% else %}text-muted{% endif %}">
+                    <span>{{ section }}</span>
+                    {% if done %}<i class="bi bi-check-circle-fill text-success"></i>{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card shadow-lg">
+            <div class="card-header bg-info text-white text-center fw-bold rounded-top">
+                {{ section_name }} <span class="badge bg-light text-dark ms-2">Section {{ section_idx+1 }} of {{ total_sections }}</span>
+            </div>
+            <div class="card-body bg-white">
+                <form method="post" enctype="multipart/form-data" id="sectionForm">
+                    {% for q in questions %}
+                        {% set qidx = loop.index0 %}
+                        <div class="mb-4 p-4 rounded border shadow-sm bg-gradient bg-light">
+                            <h5 class="mb-1 fw-bold">{{ loop.index }}. {{ q.question }}</h5>
+                            <p class="text-muted small fst-italic mb-2">{{ q.description }}</p>
+                            <div class="ms-2">
+                                {% for opt in q.options %}
+                                <div class="form-check my-1">
+                                    <input class="form-check-input" type="radio" name="answer_{{ qidx }}" value="{{ opt }}" id="q{{ qidx }}opt{{ loop.index0 }}" required>
+                                    <label class="form-check-label" for="q{{ qidx }}opt{{ loop.index0 }}">{{ opt }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Comment:</label>
+                                <input type="text" class="form-control" name="comment_{{ qidx }}" maxlength="200" placeholder="Add a brief comment...">
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Upload Evidence:</label>
+                                <input type="file" class="form-control" name="evidence_{{ qidx }}" accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-between mt-4">
+                        {% if section_idx > 0 %}
+                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=section_idx-1) }}">Back</a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-4">Next Section</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(90deg,#0d6efd 60%,#60a5fa 100%);
+}
+.btn-gradient-primary {
+    background: linear-gradient(90deg,#0d6efd 60%,#60a5fa 100%);
+    color: #fff;
+    border: none;
+}
+.btn-gradient-primary:hover { background: #0d6efd; color: #fff; }
+</style>
+{% endblock %}
