@@ -7,10 +7,18 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///securesphere.db'
+app.secret_key = 'your-secret-key-change-this-in-production'
+
+# Ensure upload folder exists
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
 ALLOWED_EXTENSIONS = {'csv', 'txt', 'pdf', 'jpg', 'jpeg', 'png'}
 
 db = SQLAlchemy(app)
@@ -301,7 +309,7 @@ def api_product_scores(product_id):
     })
 
 if __name__ == '__main__':
-    os.makedirs('static/uploads', exist_ok=True)
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     with app.app_context():
         db.create_all()
     app.run(debug=True)
