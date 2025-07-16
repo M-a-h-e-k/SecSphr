@@ -1,39 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card shadow-lg border-0">
-            <div class="card-header text-center bg-gradient-primary text-white py-4">
-                <i class="bi bi-lock-fill fs-1"></i>
-                <h4 class="fw-bold mb-0 mt-2">Secure Login</h4>
-            </div>
-            <div class="card-body bg-light px-4 py-4">
-                <form method="post" id="loginForm" novalidate>
-                    <div class="form-floating mb-3">
-                        <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
-                        <label for="username">Username</label>
-                        <div class="invalid-feedback">Please enter your username.</div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white text-center">
+                    <div class="d-inline-block rounded-circle bg-white text-primary p-2 mb-2">
+                        <i class="bi bi-person-fill"></i>
                     </div>
-                    <div class="form-floating mb-4">
-                        <input type="password" name="password" class="form-control" id="password" placeholder="Password" required minlength="6">
-                        <label for="password">Password</label>
-                        <div class="invalid-feedback">Password required (min 6 chars).</div>
+                    <h4 class="mb-0 fw-bold">Sign In</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-gradient-primary w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Don't have an account? 
+                            <a href="{{ url_for('register') }}" class="text-primary text-decoration-none">Register here</a>
+                        </small>
                     </div>
-                    <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-2">Login</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-document.getElementById("loginForm").addEventListener("submit",function(e){
-    let valid = true;
-    this.querySelectorAll("input[required]").forEach(function(input){
-        if(!input.value){ input.classList.add("is-invalid"); valid=false; }
-        else input.classList.remove("is-invalid");
-        if(input.name=="password" && input.value.length<6){ input.classList.add("is-invalid"); valid=false; }
-    });
-    if(!valid) e.preventDefault();
-});
-</script>
+
+<style>
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 576px) {
+    .col-md-6 {
+        padding: 0.5rem;
+    }
+    
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+}
+</style>
 {% endblock %}

@@ -1,9 +1,92 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="text-center py-5">
-    <h1 class="display-4 mb-3">Welcome to SecureSphere</h1>
-    <p class="lead mb-4">A secure and stylish platform for product compliance management.</p>
-    <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg me-2">Register</a>
-    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login</a>
+<div class="container-fluid">
+    <div class="row min-vh-75 align-items-center">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <div class="text-center">
+                <!-- Hero Section -->
+                <div class="mb-4">
+                    <div class="d-inline-block p-3 rounded-circle bg-gradient-primary text-white mb-3">
+                        <i class="bi bi-shield-lock-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        Welcome to <span class="text-secondary">SecureSphere</span>
+                    </h1>
+                    <p class="lead text-muted mb-4">
+                        Professional security assessment platform designed to evaluate and enhance your organization's security posture through comprehensive questionnaires and expert analysis.
+                    </p>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-3">
+                                <div class="text-primary mb-2">
+                                    <i class="bi bi-shield-check" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6 class="card-title text-primary">Comprehensive Assessment</h6>
+                                <p class="card-text small text-muted">Complete security evaluation with detailed questionnaires</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-3">
+                                <div class="text-secondary mb-2">
+                                    <i class="bi bi-bar-chart" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6 class="card-title text-secondary">Detailed Analytics</h6>
+                                <p class="card-text small text-muted">Visual charts and comprehensive reporting</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-3">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-people" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6 class="card-title text-success">Multi-Role Support</h6>
+                                <p class="card-text small text-muted">Clients, leads, and superuser management</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-gradient-primary btn-lg px-4">
+                        <i class="bi bi-person-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(111, 66, 193, 0.2) !important;
+}
+
+@media (max-width: 576px) {
+    .display-4 { font-size: 1.5rem; }
+    .lead { font-size: 0.9rem; }
+    .card-body { padding: 0.75rem; }
+}
+</style>
 {% endblock %}
