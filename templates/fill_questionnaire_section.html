@@ -57,7 +57,8 @@
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data" id="sectionForm">
-                        {% for qidx, question in questions %}
+                        {% for question in questions %}
+                        {% set qidx = loop.index0 %}
                         <div class="card mb-4 question-card questionnaire-card">
                             <div class="card-body">
                                 <div class="row">
