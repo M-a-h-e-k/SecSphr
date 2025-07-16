@@ -35,6 +35,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class QuestionnaireResponse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -170,8 +171,52 @@ def dashboard():
         return render_template('dashboard_lead.html', responses=resps)
     elif role == 'superuser':
         products = Product.query.all()
-        return render_template('dashboard_superuser.html', products=products)
+        clients = User.query.filter_by(role='client').all()
+        return render_template('dashboard_superuser.html', products=products, clients=clients)
     return redirect(url_for('index'))
+
+@app.route('/superuser/add_product_for_client', methods=['GET', 'POST'])
+@login_required('superuser')
+def add_product_for_client():
+    if request.method == 'POST':
+        name = request.form['name']
+        client_id = request.form['client_id']
+        if not name or not client_id:
+            flash('Product name and client selection required.')
+            return redirect(url_for('add_product_for_client'))
+        
+        client = User.query.get_or_404(client_id)
+        if client.role != 'client':
+            flash('Selected user is not a client.')
+            return redirect(url_for('add_product_for_client'))
+            
+        product = Product(name=name, owner_id=client_id)
+        db.session.add(product)
+        db.session.commit()
+        flash(f'Product "{name}" added for client {client.username}.')
+        return redirect(url_for('dashboard'))
+    
+    clients = User.query.filter_by(role='client').all()
+    return render_template('add_product_for_client.html', clients=clients)
+
+@app.route('/superuser/client/<int:client_id>/products')
+@login_required('superuser')
+def view_client_products(client_id):
+    client = User.query.get_or_404(client_id)
+    if client.role != 'client':
+        flash('Selected user is not a client.')
+        return redirect(url_for('dashboard'))
+    
+    products = Product.query.filter_by(owner_id=client_id).all()
+    return render_template('superuser_client_products.html', client=client, products=products)
+
+@app.route('/superuser/product/<int:product_id>/statistics')
+@login_required('superuser')
+def view_product_statistics(product_id):
+    product = Product.query.get_or_404(product_id)
+    client = User.query.get_or_404(product.owner_id)
+    resps = QuestionnaireResponse.query.filter_by(product_id=product_id).all()
+    return render_template('superuser_product_statistics.html', product=product, client=client, responses=resps)
 
 @app.route('/add_product', methods=['GET', 'POST'])
 @login_required('client')

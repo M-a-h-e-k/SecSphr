@@ -1,20 +1,114 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="mb-4">All Products</h2>
-<div class="row">
-    {% for product in products %}
-    <div class="col-md-4 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5>{{ product.name }}</h5>
-                <a href="{{ url_for('admin_product_details', product_id=product.id) }}" class="btn btn-outline-primary">View Details</a>
-                <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" class="btn btn-outline-danger ms-2">Delete</a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4 fw-bold text-primary">Superuser Dashboard</h2>
+            
+            <!-- Add Product for Client Button -->
+            <div class="mb-4">
+                <a href="{{ url_for('add_product_for_client') }}" class="btn btn-success btn-lg rounded-pill px-4">
+                    <i class="bi bi-plus-circle"></i> Add Product for Client
+                </a>
+            </div>
+
+            <!-- Registered Clients Section -->
+            <div class="card shadow-lg mb-5">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0 fw-bold">Registered Clients</h4>
+                </div>
+                <div class="card-body">
+                    {% if clients %}
+                        <div class="row">
+                            {% for client in clients %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">{{ client.username }}</h5>
+                                        <p class="card-text">
+                                            <strong>Email:</strong> {{ client.email }}<br>
+                                            <strong>Organization:</strong> {{ client.organization or 'N/A' }}<br>
+                                            <strong>Products:</strong> 
+                                            {% set client_products = products|selectattr('owner_id', 'equalto', client.id)|list %}
+                                            <span class="badge bg-info">{{ client_products|length }}</span>
+                                        </p>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ url_for('view_client_products', client_id=client.id) }}" 
+                                               class="btn btn-outline-primary btn-sm rounded-pill">
+                                                View Products
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No clients registered yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- All Products Overview Section -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-success text-white">
+                    <h4 class="mb-0 fw-bold">All Products Overview</h4>
+                </div>
+                <div class="card-body">
+                    {% if products %}
+                        <div class="row">
+                            {% for product in products %}
+                            {% set owner = clients|selectattr('id', 'equalto', product.owner_id)|first %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">{{ product.name }}</h5>
+                                        <p class="card-text">
+                                            <strong>Owner:</strong> {{ owner.username if owner else 'Unknown' }}<br>
+                                            <strong>Organization:</strong> {{ owner.organization if owner else 'N/A' }}<br>
+                                            <strong>Created:</strong> {{ product.created_at.strftime('%Y-%m-%d') if product.created_at else 'Unknown' }}
+                                        </p>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ url_for('view_product_statistics', product_id=product.id) }}" 
+                                               class="btn btn-outline-success btn-sm rounded-pill">
+                                                View Statistics
+                                            </a>
+                                            <a href="{{ url_for('admin_product_details', product_id=product.id) }}" 
+                                               class="btn btn-outline-info btn-sm rounded-pill">
+                                                Details
+                                            </a>
+                                            <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" 
+                                               class="btn btn-outline-danger btn-sm rounded-pill"
+                                               onclick="return confirm('Are you sure you want to delete this product?')">
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No products found.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-    {% endfor %}
 </div>
-{% if not products %}
-<p class="text-muted">No products found.</p>
-{% endif %}
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(90deg, #0d6efd 60%, #60a5fa 100%);
+}
+.bg-gradient-success {
+    background: linear-gradient(90deg, #198754 60%, #20c997 100%);
+}
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
 {% endblock %}
