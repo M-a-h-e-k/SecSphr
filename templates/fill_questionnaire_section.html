@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar progress - Fixed position -->
-        <div class="col-md-3">
+    <div class="questionnaire-container">
+        <!-- Sidebar progress - Responsive -->
+        <div class="sidebar-container">
             <div class="sidebar">
                 <div class="card-header">
                     <i class="bi bi-list-check me-2"></i>Progress Tracker
@@ -17,7 +17,8 @@
                         {% if idx == section_idx %}active{% elif done %}text-success{% else %}text-muted{% endif %}">
                         <span>
                             <i class="bi bi-{% if done %}check-circle-fill{% elif idx == section_idx %}arrow-right-circle-fill{% else %}circle{% endif %} me-2"></i>
-                            {{ section }}
+                            <span class="d-none d-md-inline">{{ section }}</span>
+                            <span class="d-md-none">{{ section[:15] }}{% if section|length > 15 %}...{% endif %}</span>
                         </span>
                         {% if done %}
                             <i class="bi bi-check-circle-fill text-success"></i>
@@ -27,7 +28,7 @@
                     </li>
                     {% endfor %}
                 </ul>
-                <div class="card-footer bg-light">
+                <div class="card-footer">
                     <div class="progress mb-2">
                         <div class="progress-bar" role="progressbar" 
                              style="width: {{ ((section_idx + 1) / total_sections * 100) | round(1) }}%">
@@ -41,7 +42,7 @@
         </div>
         
         <!-- Main content -->
-        <div class="col-md-9">
+        <div class="main-content flex-grow-1">
             <div class="card shadow-lg border-0">
                 <div class="card-header">
                     <div class="row align-items-center">
