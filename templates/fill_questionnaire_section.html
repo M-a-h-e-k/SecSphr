@@ -1,70 +1,206 @@
 {% extends "base.html" %}
+
+{% block title %}Questionnaire - {{ section_name }} - SecureSphere{% endblock %}
+
 {% block content %}
-<div class="row">
-    <!-- Sidebar progress -->
-    <div class="col-md-3">
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-gradient-primary text-white fw-bold">Progress</div>
-            <ul class="list-group list-group-flush">
-                {% for idx, section, done in progress %}
-                <li class="list-group-item d-flex justify-content-between align-items-center {% if idx == section_idx %}active{% elif done %}text-success{% else %}text-muted{% endif %}">
-                    <span>{{ section }}</span>
-                    {% if done %}<i class="bi bi-check-circle-fill text-success"></i>{% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    <div class="col-md-9">
-        <div class="card shadow-lg">
-            <div class="card-header bg-info text-white text-center fw-bold rounded-top">
-                {{ section_name }} <span class="badge bg-light text-dark ms-2">Section {{ section_idx+1 }} of {{ total_sections }}</span>
-            </div>
-            <div class="card-body bg-white">
-                <form method="post" enctype="multipart/form-data" id="sectionForm">
-                    {% for q in questions %}
-                        {% set qidx = loop.index0 %}
-                        <div class="mb-4 p-4 rounded border shadow-sm bg-gradient bg-light">
-                            <h5 class="mb-1 fw-bold">{{ loop.index }}. {{ q.question }}</h5>
-                            <p class="text-muted small fst-italic mb-2">{{ q.description }}</p>
-                            <div class="ms-2">
-                                {% for opt in q.options %}
-                                <div class="form-check my-1">
-                                    <input class="form-check-input" type="radio" name="answer_{{ qidx }}" value="{{ opt }}" id="q{{ qidx }}opt{{ loop.index0 }}" required>
-                                    <label class="form-check-label" for="q{{ qidx }}opt{{ loop.index0 }}">{{ opt }}</label>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            <div class="mt-2">
-                                <label class="form-label">Comment:</label>
-                                <input type="text" class="form-control" name="comment_{{ qidx }}" maxlength="200" placeholder="Add a brief comment...">
-                            </div>
-                            <div class="mt-2">
-                                <label class="form-label">Upload Evidence:</label>
-                                <input type="file" class="form-control" name="evidence_{{ qidx }}" accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
-                            </div>
-                        </div>
-                    {% endfor %}
-                    <div class="d-flex justify-content-between mt-4">
-                        {% if section_idx > 0 %}
-                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=section_idx-1) }}">Back</a>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar progress - Fixed position -->
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="card-header">
+                    <i class="bi bi-list-check me-2"></i>Progress Tracker
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for idx, section, done in progress %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center 
+                        {% if idx == section_idx %}active{% elif done %}text-success{% else %}text-muted{% endif %}">
+                        <span>
+                            <i class="bi bi-{% if done %}check-circle-fill{% elif idx == section_idx %}arrow-right-circle-fill{% else %}circle{% endif %} me-2"></i>
+                            {{ section }}
+                        </span>
+                        {% if done %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% elif idx == section_idx %}
+                            <span class="badge bg-primary">Current</span>
                         {% endif %}
-                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-4">Next Section</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="card-footer bg-light">
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ ((section_idx + 1) / total_sections * 100) | round(1) }}%">
+                        </div>
                     </div>
-                </form>
+                    <small class="text-muted">
+                        {{ section_idx + 1 }} of {{ total_sections }} sections completed
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="col-md-9">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="bi bi-clipboard-data me-2"></i>{{ section_name }}
+                            </h4>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark">
+                                Section {{ section_idx+1 }} of {{ total_sections }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="sectionForm">
+                        {% for q in questions %}
+                            {% set qidx = loop.index0 %}
+                            <div class="question-card mb-4">
+                                <div class="card shadow-sm border-0">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-1 text-primary">
+                                            <i class="bi bi-question-circle me-2"></i>
+                                            {{ loop.index }}. {{ q.question }}
+                                        </h5>
+                                        <p class="text-muted small mb-0">{{ q.description }}</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="mb-3">
+                                                    <i class="bi bi-check-circle me-2"></i>Select Answer:
+                                                </h6>
+                                                {% for opt in q.options %}
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="radio" 
+                                                           name="answer_{{ qidx }}" value="{{ opt }}" 
+                                                           id="q{{ qidx }}opt{{ loop.index0 }}" required>
+                                                    <label class="form-check-label" for="q{{ qidx }}opt{{ loop.index0 }}">
+                                                        {{ opt }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-chat-text me-2"></i>Comment (Optional):
+                                                    </label>
+                                                    <textarea class="form-control" name="comment_{{ qidx }}" 
+                                                              rows="3" maxlength="200" 
+                                                              placeholder="Add your comments or explanations..."></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-paperclip me-2"></i>Upload Evidence (Optional):
+                                                    </label>
+                                                    <input type="file" class="form-control" name="evidence_{{ qidx }}" 
+                                                           accept=".csv,.txt,.pdf,.jpg,.jpeg,.png">
+                                                    <div class="form-text">
+                                                        Supported formats: CSV, TXT, PDF, JPG, JPEG, PNG
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if section_idx > 0 %}
+                            <a class="btn btn-outline-secondary rounded-pill px-4" 
+                               href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=section_idx-1) }}">
+                                <i class="bi bi-arrow-left me-2"></i>Previous Section
+                            </a>
+                            {% else %}
+                            <div></div>
+                            {% endif %}
+                            
+                            <button type="submit" class="btn btn-gradient-primary rounded-pill px-4">
+                                {% if section_idx + 1 < total_sections %}
+                                    Next Section <i class="bi bi-arrow-right ms-2"></i>
+                                {% else %}
+                                    Complete Assessment <i class="bi bi-check-lg ms-2"></i>
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<style>
-.bg-gradient-primary {
-    background: linear-gradient(90deg,#0d6efd 60%,#60a5fa 100%);
-}
-.btn-gradient-primary {
-    background: linear-gradient(90deg,#0d6efd 60%,#60a5fa 100%);
-    color: #fff;
-    border: none;
-}
-.btn-gradient-primary:hover { background: #0d6efd; color: #fff; }
-</style>
+
+<script>
+document.getElementById('sectionForm').addEventListener('submit', function(e) {
+    let valid = true;
+    const radioGroups = {};
+    
+    // Collect all radio button groups
+    this.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+        const groupName = radio.name;
+        if (!radioGroups[groupName]) {
+            radioGroups[groupName] = [];
+        }
+        radioGroups[groupName].push(radio);
+    });
+    
+    // Check if each group has a selected option
+    Object.keys(radioGroups).forEach(function(groupName) {
+        const group = radioGroups[groupName];
+        const isChecked = group.some(radio => radio.checked);
+        
+        if (!isChecked) {
+            valid = false;
+            // Highlight the question card
+            const questionCard = group[0].closest('.question-card');
+            questionCard.classList.add('border-danger');
+            
+            // Add error message if not already present
+            if (!questionCard.querySelector('.error-message')) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message alert alert-danger mt-2';
+                errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please select an answer for this question.';
+                questionCard.querySelector('.card-body').appendChild(errorDiv);
+            }
+        } else {
+            // Remove error styling if present
+            const questionCard = group[0].closest('.question-card');
+            questionCard.classList.remove('border-danger');
+            const errorMsg = questionCard.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        }
+    });
+    
+    if (!valid) {
+        e.preventDefault();
+        // Scroll to first error
+        const firstError = document.querySelector('.border-danger');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});
+
+// Add real-time validation
+document.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const questionCard = this.closest('.question-card');
+        questionCard.classList.remove('border-danger');
+        const errorMsg = questionCard.querySelector('.error-message');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    });
+});
+</script>
 {% endblock %}

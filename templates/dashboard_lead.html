@@ -1,18 +1,275 @@
 {% extends "base.html" %}
+
+{% block title %}Lead Dashboard - SecureSphere{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">All Responses</h2>
-<div class="row">
-    {% for resp in responses %}
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6>Section: {{ resp.section }}</h6>
-                <p><b>{{ resp.question }}</b></p>
-                <p>Ans: {{ resp.answer }}</p>
-                <a href="{{ url_for('review_questionnaire', response_id=resp.id) }}" class="btn btn-outline-primary">Review / Comment</a>
+<div class="dashboard-header text-center mb-4">
+    <h1 class="display-6 fw-bold mb-2">
+        <i class="bi bi-person-badge me-3"></i>Lead Review Dashboard
+    </h1>
+    <p class="lead mb-0">Review and manage questionnaire responses from clients</p>
+</div>
+
+<!-- Dashboard Statistics -->
+<div class="dashboard-stats">
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|length }}</h3>
+                    <p class="mb-0">Total Responses</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-chat-square-text icon"></i>
+                </div>
             </div>
         </div>
     </div>
-    {% endfor %}
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|selectattr('comment')|list|length }}</h3>
+                    <p class="mb-0">With Comments</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-chat-left-dots icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|groupby('section')|list|length }}</h3>
+                    <p class="mb-0">Active Sections</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-layers icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Filter and Search -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search responses...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="sectionFilter">
+                            <option value="">All Sections</option>
+                            {% for section in responses|groupby('section') %}
+                            <option value="{{ section.0 }}">{{ section.0 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending Review</option>
+                            <option value="reviewed">Reviewed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Responses Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clipboard-check me-2"></i>Questionnaire Responses
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if responses %}
+                    <div class="row" id="responsesContainer">
+                        {% for resp in responses %}
+                        <div class="col-md-6 mb-4 response-item" 
+                             data-section="{{ resp.section }}" 
+                             data-status="{% if resp.comment %}reviewed{% else %}pending{% endif %}">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-header bg-light">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-folder me-2"></i>{{ resp.section }}
+                                            </h6>
+                                        </div>
+                                        <div class="col-auto">
+                                            {% if resp.comment %}
+                                                <span class="status-badge status-completed">Reviewed</span>
+                                            {% else %}
+                                                <span class="status-badge status-pending">Pending</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6 class="text-primary mb-2">
+                                            <i class="bi bi-question-circle me-2"></i>Question:
+                                        </h6>
+                                        <p class="mb-2">{{ resp.question }}</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h6 class="text-success mb-2">
+                                            <i class="bi bi-check-circle me-2"></i>Answer:
+                                        </h6>
+                                        <span class="badge bg-success">{{ resp.answer }}</span>
+                                    </div>
+                                    
+                                    {% if resp.comment %}
+                                    <div class="mb-3">
+                                        <h6 class="text-warning mb-2">
+                                            <i class="bi bi-chat-text me-2"></i>Comment:
+                                        </h6>
+                                        <p class="text-muted small">{{ resp.comment }}</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="d-grid">
+                                        <a href="{{ url_for('review_questionnaire', response_id=resp.id) }}" 
+                                           class="btn btn-gradient-primary rounded-pill">
+                                            <i class="bi bi-pencil-square me-2"></i>
+                                            {% if resp.comment %}Update Review{% else %}Add Review{% endif %}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-2"></i>Response ID: {{ resp.id }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Responses Yet</h4>
+                        <p class="text-muted mb-4">Client questionnaire responses will appear here for review.</p>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Responses are automatically added when clients complete questionnaires.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Modal -->
+<div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="statsModalLabel">
+                    <i class="bi bi-bar-chart me-2"></i>Response Statistics
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Response Distribution</h6>
+                        <canvas id="responseChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Section Coverage</h6>
+                        <div class="list-group">
+                            {% for section in responses|groupby('section') %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ section.0 }}
+                                <span class="badge bg-primary">{{ section.1|length }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search and Filter Functions
+function filterResponses() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const sectionFilter = document.getElementById('sectionFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const items = document.querySelectorAll('.response-item');
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const section = item.getAttribute('data-section');
+        const status = item.getAttribute('data-status');
+        
+        let show = true;
+        
+        if (searchTerm && !text.includes(searchTerm)) {
+            show = false;
+        }
+        
+        if (sectionFilter && section !== sectionFilter) {
+            show = false;
+        }
+        
+        if (statusFilter && status !== statusFilter) {
+            show = false;
+        }
+        
+        item.style.display = show ? 'block' : 'none';
+    });
+}
+
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sectionFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterResponses();
+}
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('input', filterResponses);
+document.getElementById('sectionFilter').addEventListener('change', filterResponses);
+document.getElementById('statusFilter').addEventListener('change', filterResponses);
+
+// Animation for stats cards
+document.addEventListener('DOMContentLoaded', function() {
+    const statsCards = document.querySelectorAll('.stat-card');
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.transform = 'translateY(-5px)';
+        }, index * 200);
+    });
+});
+</script>
 {% endblock %}

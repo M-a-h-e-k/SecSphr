@@ -1,81 +1,377 @@
 {% extends "base.html" %}
+
+{% block title %}Results & Analytics - SecureSphere{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-center">Results & Scores</h2>
+<div class="dashboard-header text-center mb-4">
+    <h1 class="display-6 fw-bold mb-2">
+        <i class="bi bi-graph-up me-3"></i>Security Assessment Results
+    </h1>
+    <p class="lead mb-0">Comprehensive analysis of your security posture</p>
+</div>
+
+<!-- Key Metrics -->
+<div class="dashboard-stats">
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0" id="overallScore">-</h3>
+                    <p class="mb-0">Overall Score</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-trophy icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|length }}</h3>
+                    <p class="mb-0">Total Responses</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-check2-circle icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0" id="sectionsCount">-</h3>
+                    <p class="mb-0">Sections Assessed</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-layers icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card dashboard-card h-100">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart me-2"></i>Overall Security Score
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="chart-container">
+                    <canvas id="overallChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="progress">
+                        <div class="progress-bar bg-gradient-primary" role="progressbar" 
+                             style="width: 0%" id="overallProgress">
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <span id="scoreText">Calculating...</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card dashboard-card h-100">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart me-2"></i>Section-wise Performance
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="chart-container">
+                    <canvas id="sectionChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        Performance across different security dimensions
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Results -->
 <div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-gradient-primary text-white fw-bold">Overall Score</div>
-            <div class="card-body text-center">
-                <canvas id="overallChart" height="180"></canvas>
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-gradient-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table me-2"></i>Detailed Assessment Results
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-light btn-sm" onclick="exportResults()">
+                                <i class="bi bi-download me-2"></i>Export
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="showFilters()">
+                                <i class="bi bi-funnel me-2"></i>Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-gradient-primary text-white fw-bold">Section-wise Scores</div>
-            <div class="card-body text-center">
-                <canvas id="sectionChart" height="180"></canvas>
+            <div class="card-body">
+                {% if responses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <i class="bi bi-folder me-2"></i>Section
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-question-circle me-2"></i>Question
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-check-circle me-2"></i>Answer
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-chat-text me-2"></i>Comment
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-paperclip me-2"></i>Evidence
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-star me-2"></i>Score
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in responses %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary">{{ r.section }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ r.question }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ r.answer }}</span>
+                                    </td>
+                                    <td>
+                                        {% if r.comment %}
+                                            <i class="bi bi-chat-fill text-primary me-2"></i>
+                                            <span class="text-muted">{{ r.comment }}</span>
+                                        {% else %}
+                                            <span class="text-muted">No comment</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if r.evidence_path %}
+                                            <a href="/{{ r.evidence_path }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye me-2"></i>View
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No evidence</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info score-badge" data-question="{{ r.question }}" data-answer="{{ r.answer }}">
+                                            <i class="bi bi-hourglass-split"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Results Available</h4>
+                        <p class="text-muted mb-4">Complete the questionnaire to see your security assessment results.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-gradient-primary rounded-pill">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-<div class="card shadow mb-4">
-    <div class="card-header bg-info text-white fw-bold">All Responses</div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Section</th>
-                    <th>Question</th>
-                    <th>Answer</th>
-                    <th>Comment</th>
-                    <th>Evidence</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in responses %}
-                <tr>
-                    <td>{{ r.section }}</td>
-                    <td>{{ r.question }}</td>
-                    <td>{{ r.answer }}</td>
-                    <td>{{ r.comment }}</td>
-                    <td>
-                        {% if r.evidence_path %}
-                        <a href="/{{ r.evidence_path }}" target="_blank">View</a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="bi bi-funnel me-2"></i>Filter Results
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="sectionFilter" class="form-label">Section</label>
+                    <select class="form-select" id="sectionFilter">
+                        <option value="">All Sections</option>
+                        {% for section in responses|groupby('section') %}
+                        <option value="{{ section.0 }}">{{ section.0 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="searchFilter" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchFilter" placeholder="Search in questions or answers...">
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-gradient-primary" onclick="applyFilters()">Apply Filters</button>
+                    <button class="btn btn-outline-secondary" onclick="resetFilters()">Reset Filters</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
 <script>
-fetch('{{ url_for("api_product_scores", product_id=responses[0].product_id if responses else 0) }}')
+// Get chart data and initialize
+{% if responses %}
+fetch('{{ url_for("api_product_scores", product_id=responses[0].product_id) }}')
     .then(res => res.json())
     .then(data => {
-        // Overall
-        new Chart(document.getElementById('overallChart'), {
+        // Update stats
+        document.getElementById('overallScore').textContent = data.total_score;
+        document.getElementById('sectionsCount').textContent = data.section_labels.length;
+        
+        const percentage = Math.round((data.total_score / data.max_score) * 100);
+        document.getElementById('overallProgress').style.width = percentage + '%';
+        document.getElementById('scoreText').textContent = `${data.total_score} out of ${data.max_score} (${percentage}%)`;
+        
+        // Overall Chart
+        const overallCtx = document.getElementById('overallChart').getContext('2d');
+        new Chart(overallCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Total Score'],
-                datasets: [{ data: [data.total_score, data.max_score - data.total_score], backgroundColor:['#0d6efd','#e9ecef'] }]
+                labels: ['Score', 'Remaining'],
+                datasets: [{
+                    data: [data.total_score, data.max_score - data.total_score],
+                    backgroundColor: ['#2563eb', '#e5e7eb'],
+                    borderWidth: 0
+                }]
             },
-            options: { plugins: { legend: { display: false } }, cutout:'70%' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%'
+            }
         });
-        // Section-wise
-        new Chart(document.getElementById('sectionChart'), {
+        
+        // Section Chart
+        const sectionCtx = document.getElementById('sectionChart').getContext('2d');
+        new Chart(sectionCtx, {
             type: 'bar',
             data: {
                 labels: data.section_labels,
                 datasets: [{
                     label: 'Score',
                     data: data.section_scores,
-                    backgroundColor:'#0d6efd'
+                    backgroundColor: '#2563eb',
+                    borderRadius: 8,
+                    borderSkipped: false
                 }]
             },
-            options: { responsive:true, plugins:{legend:{display:false}} }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f1f5f9'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
         });
     });
+{% endif %}
+
+// Filter functions
+function showFilters() {
+    new bootstrap.Modal(document.getElementById('filterModal')).show();
+}
+
+function applyFilters() {
+    const sectionFilter = document.getElementById('sectionFilter').value;
+    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('#resultsTable tbody tr');
+    
+    rows.forEach(row => {
+        const section = row.querySelector('.badge').textContent;
+        const text = row.textContent.toLowerCase();
+        
+        let show = true;
+        
+        if (sectionFilter && section !== sectionFilter) {
+            show = false;
+        }
+        
+        if (searchFilter && !text.includes(searchFilter)) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('filterModal')).hide();
+}
+
+function resetFilters() {
+    document.getElementById('sectionFilter').value = '';
+    document.getElementById('searchFilter').value = '';
+    
+    const rows = document.querySelectorAll('#resultsTable tbody tr');
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('filterModal')).hide();
+}
+
+function exportResults() {
+    alert('Export functionality - would generate PDF/CSV report');
+}
+
+// Animation for stats cards
+document.addEventListener('DOMContentLoaded', function() {
+    const statsCards = document.querySelectorAll('.stat-card');
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.transform = 'translateY(-5px)';
+        }, index * 200);
+    });
+});
 </script>
 {% endblock %}

@@ -1,39 +1,133 @@
 {% extends "base.html" %}
+
+{% block title %}Login - SecureSphere{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card shadow-lg border-0">
-            <div class="card-header text-center bg-gradient-primary text-white py-4">
-                <i class="bi bi-lock-fill fs-1"></i>
-                <h4 class="fw-bold mb-0 mt-2">Secure Login</h4>
+<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="auth-card shadow-lg">
+                    <div class="card-header text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-shield-lock-fill fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">Welcome Back</h4>
+                        <p class="mb-0 opacity-75">Sign in to your account</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="loginForm" novalidate>
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control" id="username" 
+                                       placeholder="Username" required>
+                                <label for="username">
+                                    <i class="bi bi-person-fill me-2"></i>Username
+                                </label>
+                                <div class="invalid-feedback">Please enter your username.</div>
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                <input type="password" name="password" class="form-control" id="password" 
+                                       placeholder="Password" required minlength="6">
+                                <label for="password">
+                                    <i class="bi bi-lock-fill me-2"></i>Password
+                                </label>
+                                <div class="invalid-feedback">Password required (min 6 chars).</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="remember_me" id="remember_me">
+                                        <label class="form-check-label" for="remember_me">
+                                            Remember me
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <a href="#" class="link-primary" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                                        Forgot password?
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-3 mb-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                            </button>
+                            
+                            <div class="text-center">
+                                <span class="text-muted">Don't have an account? </span>
+                                <a href="{{ url_for('register') }}" class="link-primary">Sign up</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="card-body bg-light px-4 py-4">
-                <form method="post" id="loginForm" novalidate>
-                    <div class="form-floating mb-3">
-                        <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
-                        <label for="username">Username</label>
-                        <div class="invalid-feedback">Please enter your username.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">
+                    <i class="bi bi-key-fill me-2"></i>Reset Password
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="forgotPasswordForm">
+                    <div class="mb-3">
+                        <label for="forgot_email" class="form-label">
+                            <i class="bi bi-envelope-fill me-2"></i>Email Address
+                        </label>
+                        <input type="email" class="form-control" id="forgot_email" name="forgot_email" 
+                               placeholder="Enter your email address" required>
+                        <div class="form-text">
+                            We'll send you a link to reset your password.
+                        </div>
                     </div>
-                    <div class="form-floating mb-4">
-                        <input type="password" name="password" class="form-control" id="password" placeholder="Password" required minlength="6">
-                        <label for="password">Password</label>
-                        <div class="invalid-feedback">Password required (min 6 chars).</div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-gradient-primary">
+                            <i class="bi bi-send-fill me-2"></i>Send Reset Link
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-gradient-primary w-100 rounded-pill py-2">Login</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 <script>
-document.getElementById("loginForm").addEventListener("submit",function(e){
+document.getElementById("loginForm").addEventListener("submit", function(e) {
     let valid = true;
-    this.querySelectorAll("input[required]").forEach(function(input){
-        if(!input.value){ input.classList.add("is-invalid"); valid=false; }
-        else input.classList.remove("is-invalid");
-        if(input.name=="password" && input.value.length<6){ input.classList.add("is-invalid"); valid=false; }
+    this.querySelectorAll("input[required]").forEach(function(input) {
+        if (!input.value) { 
+            input.classList.add("is-invalid"); 
+            valid = false; 
+        } else {
+            input.classList.remove("is-invalid");
+        }
+        if (input.name == "password" && input.value.length < 6) { 
+            input.classList.add("is-invalid"); 
+            valid = false; 
+        }
     });
-    if(!valid) e.preventDefault();
+    if (!valid) e.preventDefault();
+});
+
+document.getElementById("forgotPasswordForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("forgot_email").value;
+    if (!email) {
+        alert("Please enter your email address.");
+        return;
+    }
+    // For demo purposes - in real app, this would send to backend
+    alert("Password reset link sent to " + email + " (Demo - feature not implemented in backend)");
+    bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
 });
 </script>
 {% endblock %}

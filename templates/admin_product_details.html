@@ -1,30 +1,256 @@
 {% extends "base.html" %}
+
+{% block title %}Product Details - SecureSphere{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">All Questionnaire Responses</h2>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Section</th>
-            <th>Question</th>
-            <th>Answer</th>
-            <th>Comment</th>
-            <th>Evidence</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in responses %}
-        <tr>
-            <td>{{ r.section }}</td>
-            <td>{{ r.question }}</td>
-            <td>{{ r.answer }}</td>
-            <td>{{ r.comment }}</td>
-            <td>
-                {% if r.evidence_path %}
-                <a href="/{{ r.evidence_path }}" target="_blank">View</a>
+<div class="dashboard-header text-center mb-4">
+    <h1 class="display-6 fw-bold mb-2">
+        <i class="bi bi-clipboard-data me-3"></i>Product Assessment Details
+    </h1>
+    <p class="lead mb-0">Complete overview of questionnaire responses</p>
+</div>
+
+<!-- Product Stats -->
+<div class="dashboard-stats">
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|length }}</h3>
+                    <p class="mb-0">Total Responses</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-chat-square-text icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|groupby('section')|list|length }}</h3>
+                    <p class="mb-0">Sections</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-layers icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card stat-card text-center">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h3 class="mb-0">{{ responses|selectattr('comment')|list|length }}</h3>
+                    <p class="mb-0">With Comments</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-chat-left-dots icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search responses...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="sectionFilter">
+                            <option value="">All Sections</option>
+                            {% for section in responses|groupby('section') %}
+                            <option value="{{ section.0 }}">{{ section.0 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-outline-primary" onclick="exportData()">
+                                <i class="bi bi-download me-2"></i>Export
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Responses Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-table me-2"></i>All Questionnaire Responses
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if responses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="responsesTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <i class="bi bi-hash me-2"></i>ID
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-folder me-2"></i>Section
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-question-circle me-2"></i>Question
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-check-circle me-2"></i>Answer
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-chat-text me-2"></i>Comment
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-paperclip me-2"></i>Evidence
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-calendar me-2"></i>Date
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in responses %}
+                                <tr class="response-row" data-section="{{ r.section }}">
+                                    <td>
+                                        <span class="badge bg-secondary">#{{ r.id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ r.section }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ r.question }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ r.answer }}</span>
+                                    </td>
+                                    <td>
+                                        {% if r.comment %}
+                                            <div class="text-muted">
+                                                <i class="bi bi-chat-fill text-primary me-2"></i>
+                                                {{ r.comment }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No comment</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if r.evidence_path %}
+                                            <a href="/{{ r.evidence_path }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye me-2"></i>View
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No evidence</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if r.created_at %}
+                                                {{ r.created_at.strftime('%Y-%m-%d') }}
+                                            {% else %}
+                                                Recent
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">No Responses Found</h4>
+                        <p class="text-muted mb-4">This product has no questionnaire responses yet.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-gradient-primary rounded-pill">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
                 {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Dashboard -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+// Search and Filter Functions
+function filterResponses() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const sectionFilter = document.getElementById('sectionFilter').value;
+    
+    const rows = document.querySelectorAll('.response-row');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const section = row.getAttribute('data-section');
+        
+        let show = true;
+        
+        if (searchTerm && !text.includes(searchTerm)) {
+            show = false;
+        }
+        
+        if (sectionFilter && section !== sectionFilter) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sectionFilter').value = '';
+    filterResponses();
+}
+
+function exportData() {
+    alert('Export functionality - would generate CSV/PDF report of all responses');
+}
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('input', filterResponses);
+document.getElementById('sectionFilter').addEventListener('change', filterResponses);
+
+// Animation for stats cards
+document.addEventListener('DOMContentLoaded', function() {
+    const statsCards = document.querySelectorAll('.stat-card');
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.transform = 'translateY(-5px)';
+        }, index * 200);
+    });
+});
+</script>
 {% endblock %}
