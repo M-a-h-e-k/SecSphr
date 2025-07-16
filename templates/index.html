@@ -8,7 +8,7 @@
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-6">
                 <div class="hero-content text-center text-lg-start">
-                    <h1 class="display-4 fw-bold mb-4">
+                    <h1 class="display-4 fw-bold mb-3">
                         <span class="text-gradient">SecureSphere</span>
                     </h1>
                     <p class="lead mb-4">
@@ -18,7 +18,7 @@
                         <a href="{{ url_for('register') }}" class="btn btn-gradient-primary btn-lg rounded-pill px-4">
                             <i class="bi bi-rocket-takeoff me-2"></i>Get Started
                         </a>
-                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
                         </a>
                     </div>
@@ -27,23 +27,25 @@
             <div class="col-lg-6">
                 <div class="hero-image text-center">
                     <div class="dashboard-preview">
-                        <i class="bi bi-shield-lock-fill display-1 text-primary mb-4"></i>
+                        <div class="shield-icon">
+                            <i class="bi bi-shield-lock-fill display-1 text-light mb-4"></i>
+                        </div>
                         <div class="feature-cards">
                             <div class="card feature-card">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-clipboard-check fs-3 text-success mb-2"></i>
+                                    <i class="bi bi-clipboard-check fs-4 text-success mb-2"></i>
                                     <h6>Comprehensive Assessment</h6>
                                 </div>
                             </div>
                             <div class="card feature-card">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-graph-up fs-3 text-info mb-2"></i>
+                                    <i class="bi bi-graph-up fs-4 text-info mb-2"></i>
                                     <h6>Detailed Analytics</h6>
                                 </div>
                             </div>
                             <div class="card feature-card">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-people fs-3 text-warning mb-2"></i>
+                                    <i class="bi bi-people fs-4 text-warning mb-2"></i>
                                     <h6>Expert Review</h6>
                                 </div>
                             </div>
@@ -96,6 +98,41 @@
     </div>
 </div>
 
+<!-- Process Section -->
+<div class="process-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-6 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Simple steps to secure your organization</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="process-step text-center">
+                    <div class="step-number">1</div>
+                    <h5 class="mt-3">Register & Add Product</h5>
+                    <p class="text-muted">Create your account and add your first product for assessment.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="process-step text-center">
+                    <div class="step-number">2</div>
+                    <h5 class="mt-3">Complete Assessment</h5>
+                    <p class="text-muted">Answer comprehensive questionnaires across security dimensions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="process-step text-center">
+                    <div class="step-number">3</div>
+                    <h5 class="mt-3">Get Results</h5>
+                    <p class="text-muted">Receive detailed reports and expert recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CTA Section -->
 <div class="cta-section py-5 bg-gradient-custom text-white">
     <div class="container">
@@ -121,20 +158,36 @@
 }
 
 .hero-content h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content .lead {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    line-height: 1.6;
 }
 
 .dashboard-preview {
     position: relative;
-    padding: 2rem;
+    padding: 1.5rem;
+}
+
+.shield-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 .feature-cards {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    max-width: 300px;
+    gap: 0.75rem;
+    max-width: 280px;
     margin: 0 auto;
 }
 
@@ -143,11 +196,13 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .features-section {
@@ -158,24 +213,86 @@
     background: white;
     border: 1px solid rgba(226, 232, 240, 0.8);
     transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
 .features-section .feature-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: var(--card-shadow-lg);
+}
+
+.process-section {
+    background: #f8fafc;
+}
+
+.process-step {
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.process-step:hover {
+    transform: translateY(-2px);
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .cta-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+.btn-outline-light {
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    background: transparent;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    color: white;
+    transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
     .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
+    }
+    
+    .hero-content .lead {
+        font-size: 1rem;
     }
     
     .feature-cards {
         max-width: 250px;
+    }
+    
+    .step-number {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .dashboard-preview {
+        padding: 1rem;
     }
 }
 </style>
@@ -185,17 +302,33 @@
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.feature-card');
     cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.2}s`;
+        card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in');
     });
     
-    // Add parallax effect to hero section
+    const processSteps = document.querySelectorAll('.process-step');
+    processSteps.forEach((step, index) => {
+        step.style.animationDelay = `${index * 0.2}s`;
+        step.classList.add('fade-in');
+    });
+    
+    // Add subtle parallax effect to hero section
     window.addEventListener('scroll', function() {
         const scrolled = window.pageYOffset;
         const hero = document.querySelector('.hero-section');
-        if (hero) {
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        if (hero && scrolled < window.innerHeight) {
+            hero.style.transform = `translateY(${scrolled * 0.3}px)`;
         }
+    });
+    
+    // Add smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
     });
 });
 </script>
