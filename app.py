@@ -88,6 +88,15 @@ def load_questionnaire():
 QUESTIONNAIRE = load_questionnaire()
 SECTION_IDS = list(QUESTIONNAIRE.keys())
 
+def is_assessment_complete(product_id, user_id):
+    """Check if assessment is complete for a product"""
+    completed_sections = set([
+        r.section for r in QuestionnaireResponse.query.filter_by(
+            product_id=product_id, user_id=user_id
+        ).all()
+    ])
+    return len(completed_sections) == len(SECTION_IDS)
+
 def login_required(role=None):
     def decorator(f):
         @wraps(f)
@@ -165,14 +174,32 @@ def dashboard():
     user_id = session['user_id']
     if role == 'client':
         products = Product.query.filter_by(owner_id=user_id).all()
-        return render_template('dashboard_client.html', products=products)
+        # Add completion status for each product
+        products_with_status = []
+        for product in products:
+            is_complete = is_assessment_complete(product.id, user_id)
+            products_with_status.append({
+                'product': product,
+                'is_complete': is_complete
+            })
+        return render_template('dashboard_client.html', products=products, products_with_status=products_with_status)
     elif role == 'lead':
         resps = QuestionnaireResponse.query.all()
         return render_template('dashboard_lead.html', responses=resps)
     elif role == 'superuser':
         products = Product.query.all()
         clients = User.query.filter_by(role='client').all()
-        return render_template('dashboard_superuser.html', products=products, clients=clients)
+        
+        # Add completion status for products
+        products_with_status = []
+        for product in products:
+            is_complete = is_assessment_complete(product.id, product.owner_id)
+            products_with_status.append({
+                'product': product,
+                'is_complete': is_complete
+            })
+        
+        return render_template('dashboard_superuser.html', products=products, clients=clients, products_with_status=products_with_status)
     return redirect(url_for('index'))
 
 @app.route('/superuser/add_product_for_client', methods=['GET', 'POST'])
@@ -208,7 +235,17 @@ def view_client_products(client_id):
         return redirect(url_for('dashboard'))
     
     products = Product.query.filter_by(owner_id=client_id).all()
-    return render_template('superuser_client_products.html', client=client, products=products)
+    
+    # Add completion status for products
+    products_with_status = []
+    for product in products:
+        is_complete = is_assessment_complete(product.id, client_id)
+        products_with_status.append({
+            'product': product,
+            'is_complete': is_complete
+        })
+    
+    return render_template('superuser_client_products.html', client=client, products=products, products_with_status=products_with_status)
 
 @app.route('/superuser/product/<int:product_id>/statistics')
 @login_required('superuser')
@@ -216,7 +253,8 @@ def view_product_statistics(product_id):
     product = Product.query.get_or_404(product_id)
     client = User.query.get_or_404(product.owner_id)
     resps = QuestionnaireResponse.query.filter_by(product_id=product_id).all()
-    return render_template('superuser_product_statistics.html', product=product, client=client, responses=resps)
+    is_complete = is_assessment_complete(product_id, client.id)
+    return render_template('superuser_product_statistics.html', product=product, client=client, responses=resps, is_complete=is_complete)
 
 @app.route('/add_product', methods=['GET', 'POST'])
 @login_required('client')

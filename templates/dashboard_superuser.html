@@ -67,20 +67,27 @@
                     <h5 class="mb-0 fw-bold">All Products Overview</h5>
                 </div>
                 <div class="card-body">
-                    {% if products %}
+                    {% if products_with_status %}
                         <div class="row g-3">
-                            {% for product in products %}
+                            {% for item in products_with_status %}
+                            {% set product = item.product %}
+                            {% set is_complete = item.is_complete %}
                             {% set owner = clients|selectattr('id', 'equalto', product.owner_id)|first %}
                             <div class="col-xl-4 col-lg-6 col-md-6">
                                 <div class="card border-0 shadow-sm h-100">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-2">
-                                            <div class="rounded-circle bg-gradient-success text-white p-2 me-3">
-                                                <i class="bi bi-box-seam"></i>
+                                            <div class="rounded-circle {% if is_complete %}bg-gradient-success{% else %}bg-gradient-warning{% endif %} text-white p-2 me-3">
+                                                <i class="bi {% if is_complete %}bi-check-circle{% else %}bi-hourglass-split{% endif %}"></i>
                                             </div>
                                             <div>
                                                 <h6 class="card-title text-success mb-0">{{ product.name }}</h6>
                                                 <small class="text-muted">{{ owner.username if owner else 'Unknown' }}</small>
+                                                {% if is_complete %}
+                                                    <span class="badge bg-success ms-1">Complete</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning ms-1">In Progress</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="mb-2">

@@ -1,21 +1,94 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="mb-4 fw-bold text-primary">Your Products</h2>
-<a href="{{ url_for('add_product') }}" class="btn btn-gradient-primary mb-3 rounded-pill px-4">Add New Product</a>
-<div class="row g-4">
-    {% for product in products %}
-    <div class="col-md-4">
-        <div class="card border-0 shadow-lg">
-            <div class="card-body">
-                <h5 class="card-title fw-bold">{{ product.name }}</h5>
-                <a href="{{ url_for('product_results', product_id=product.id) }}" class="btn btn-outline-primary rounded-pill">View Results</a>
-                <a href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=0) }}" class="btn btn-outline-success rounded-pill ms-2">Continue Questionnaire</a>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-primary mb-0">Your Products</h2>
+        <a href="{{ url_for('add_product') }}" class="btn btn-gradient-primary rounded-pill px-3">
+            <i class="bi bi-plus-circle me-1"></i> Add Product
+        </a>
+    </div>
+    
+    <div class="row g-3">
+        {% for item in products_with_status %}
+        {% set product = item.product %}
+        {% set is_complete = item.is_complete %}
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-circle {% if is_complete %}bg-gradient-success{% else %}bg-gradient-secondary{% endif %} text-white p-2 me-3">
+                            <i class="bi {% if is_complete %}bi-check-circle{% else %}bi-hourglass-split{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="card-title text-primary mb-0">{{ product.name }}</h6>
+                            <small class="text-muted">
+                                {% if is_complete %}
+                                    <span class="badge bg-success">Complete</span>
+                                {% else %}
+                                    <span class="badge bg-warning">In Progress</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted d-block">
+                            <strong>Created:</strong> {{ product.created_at.strftime('%Y-%m-%d') if product.created_at else 'Unknown' }}
+                        </small>
+                        <small class="text-muted d-block">
+                            <strong>Product ID:</strong> {{ product.id }}
+                        </small>
+                    </div>
+                    
+                    <div class="d-flex gap-1 flex-wrap">
+                        <a href="{{ url_for('product_results', product_id=product.id) }}" 
+                           class="btn btn-outline-primary btn-sm rounded-pill">
+                            <i class="bi bi-bar-chart me-1"></i>Results
+                        </a>
+                        <a href="{{ url_for('fill_questionnaire_section', product_id=product.id, section_idx=0) }}" 
+                           class="btn {% if is_complete %}btn-outline-success{% else %}btn-gradient-primary{% endif %} btn-sm rounded-pill">
+                            <i class="bi {% if is_complete %}bi-check-circle{% else %}bi-play-circle{% endif %} me-1"></i>
+                            {% if is_complete %}Review{% else %}Continue{% endif %}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    
+    {% if not products_with_status %}
+    <div class="text-center py-5">
+        <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"></i>
+        <h5 class="text-muted mt-3">No products yet</h5>
+        <p class="text-muted">Start by adding your first product to begin security assessment.</p>
+        <a href="{{ url_for('add_product') }}" class="btn btn-gradient-primary rounded-pill px-4">
+            <i class="bi bi-plus-circle me-2"></i>Add First Product
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% if not products %}
-<p class="text-muted">No products yet. Start by adding a product.</p>
-{% endif %}
+
+<style>
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 576px) {
+    .d-flex.gap-1 {
+        flex-wrap: wrap;
+    }
+    
+    .btn-sm {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+</style>
 {% endblock %}

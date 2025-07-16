@@ -17,7 +17,19 @@
                             <h4 class="mb-0 fw-bold">Product Information</h4>
                         </div>
                         <div class="card-body">
-                            <h5 class="text-primary">{{ product.name }}</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle {% if is_complete %}bg-gradient-success{% else %}bg-gradient-warning{% endif %} text-white p-2 me-3">
+                                    <i class="bi {% if is_complete %}bi-check-circle{% else %}bi-hourglass-split{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-primary mb-0">{{ product.name }}</h5>
+                                    {% if is_complete %}
+                                        <span class="badge bg-success">Assessment Complete</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Assessment In Progress</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                             <p class="mb-2"><strong>Product ID:</strong> {{ product.id }}</p>
                             <p class="mb-2"><strong>Created:</strong> {{ product.created_at.strftime('%Y-%m-%d %H:%M') if product.created_at else 'Unknown' }}</p>
                             <p class="mb-0"><strong>Total Responses:</strong> {{ responses|length }}</p>
@@ -40,6 +52,7 @@
             </div>
 
             <!-- Charts Section -->
+            {% if responses %}
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card shadow-lg">
@@ -65,6 +78,15 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="card shadow-lg mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-clipboard-data text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="text-muted mt-3">No Assessment Data Available</h5>
+                    <p class="text-muted">The client hasn't started the questionnaire for this product yet.</p>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Responses Table -->
             <div class="card shadow-lg">
@@ -188,19 +210,19 @@ fetch('{{ url_for("api_product_scores", product_id=product.id) }}')
 
 <style>
 .bg-gradient-primary {
-    background: linear-gradient(90deg, #0d6efd 60%, #60a5fa 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-light) 100%);
 }
 .bg-gradient-info {
-    background: linear-gradient(90deg, #0dcaf0 60%, #20c997 100%);
+    background: linear-gradient(135deg, #0dcaf0 60%, var(--purple-lighter) 100%);
 }
 .bg-gradient-success {
-    background: linear-gradient(90deg, #198754 60%, #20c997 100%);
+    background: linear-gradient(135deg, #198754 60%, #20c997 100%);
 }
 .bg-gradient-warning {
-    background: linear-gradient(90deg, #ffc107 60%, #ffb300 100%);
+    background: linear-gradient(135deg, #ffc107 60%, #ffb300 100%);
 }
 .bg-gradient-secondary {
-    background: linear-gradient(90deg, #6c757d 60%, #adb5bd 100%);
+    background: linear-gradient(135deg, #6c757d 60%, #adb5bd 100%);
 }
 .card {
     transition: transform 0.2s;
